@@ -1,7 +1,9 @@
+import time
+from apscheduler.schedulers.blocking import BlockingScheduler
 from cqhttp import CQHttp
 import db, manager, tuling_reply
 
-bot = CQHttp(api_root='http://127.0.0.1:5700/')
+bot = CQHttp(api_root='http://127.0.0.1:5700')
 ROOT = 6965717
 GROUP = 593465097
 
@@ -29,6 +31,7 @@ def handle_msg(context):
         if str(msg).startswith("-") and user == ROOT:
             manager.group_manager(context, group, msg, image_msg, user)
             qq_list = db.select_all()
+
         else:
             if qq_list is None:
                 qq_list = db.select_all()
@@ -54,6 +57,24 @@ def handle_group_increase(context):
                  is_raw=True)  # 发送欢迎新人
 
 
+# 成员退出
+@bot.on_event('group_decrease')
+def handle_group_increase(context):
+    global qq_list
+    if qq_list is None:
+        qq_list = db.select_all()
+    group_type = manager.is_support(context["group_id"], qq_list)
+    if group_type:
+        reply = ""
+        user = context["user_id"]
+        type_event = context["sub_type"]
+        if type_event == "leave":
+            reply = "退出群"
+        elif type_event == "kick" and type_event == "kick_me":
+            reply = "被踢出群"
+        bot.send(context, message=manager.get_stranger_info(user) + reply, is_raw=True)
+
+
 @bot.on_request('friend')
 def handle_request(context):
     return {'approve': True}  # 同意加好友请求
@@ -69,6 +90,17 @@ def handle_group_request(context):
     # 群: 303331009 QQ: 605774840
 
 
-# 群: 593465097 QQ: 584052568
-# [CQ:image,file=26800D9B2B305D25EDEC7700EE155DDB.png]
 bot.run(host='127.0.0.1', port=8080)
+
+
+# def my_job():
+#     global qq_list
+#     for group in qq_list:
+#         bot.send_group_msg(group_id=group["number"],
+#                                  message=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),
+#                                  auto_escape=False)
+#
+#
+# sched = BlockingScheduler()
+# sched.add_job(my_job, 'interval', seconds=10)
+# sched.start()

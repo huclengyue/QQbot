@@ -129,5 +129,5 @@ def select_sensitive_all():
 
 if __name__ == '__main__':
     # update(6965717, ALLOW)
-    # update(6965717, SIMPLE)
-    select_all()
+    insert_dt(593465097, SIMPLE)
+    # select_all()

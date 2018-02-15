@@ -76,3 +76,17 @@ def json_pare(json):
         if msg_type == "text":
             text.append(message["data"]["text"])
     return "".join(text), image_url
+
+
+# 陌生人的信息
+def get_stranger_info(id):
+    data = bot.get_stranger_info(user_id=id, no_cache=True)
+    if data:
+        if data["nickname"]:
+            return data["nickname"]
+        else:
+            return id
+
+
+def get_group_member_list():
+    pass
